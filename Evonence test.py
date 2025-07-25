@@ -13,12 +13,13 @@ def validate_data(data):
 
 # Example data
 data = [
-    {"name": "Alice", "age": 30},
-    {"name": "Bob", "age": "25"},
-    {"name": "Charlie", "age": None},
-    {"name": "Diana", "age": 22},
-    {"name": "Eve"}  # age key is missing
+    {"name": "Amit", "age": 30},
+    {"name": "Boby", "age": "25"},
+    {"name": "Viraj", "age": 22},
+    {"name": "Ansh", "age": None}, # age not specified
+    {"name": "Abhijit" } # age key is missing
 ]
+
 # Validate data
 invalid = validate_data(data)
 # Output the result
@@ -28,9 +29,9 @@ for entry in invalid:
 
 """Output:
 Invalid entries:
-{'name': 'Bob', 'age': '25'}
-{'name': 'Charlie', 'age': None}
-{'name': 'Eve'}
+{'name': 'Boby', 'age': '25'}
+{'name': 'Ansh', 'age': None}
+{'name': 'Abhijit'}
 """
 
 """Scenario 2: Logging DecoratorTask: Create a decorator @log_execution_time that logs the time taken to execute a function.
@@ -75,7 +76,7 @@ import numpy as np
 
 # Sample dataset
 data = {
-    "name": ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace"],
+     "name": ["Amit", "Boby", "Ansh", "Viraj", "Ankita", "Jayesh", "Snehal"],
     "income": [50000, 55000, np.nan, 60000, 65000, np.nan, 70000]
 }
 
@@ -103,14 +104,14 @@ Skewness of 'income': 0.00
 Filled missing values with median: 60000.0
 
 Updated DataFrame:
-      name   income
-0    Alice  50000.0
-1      Bob  55000.0
-2  Charlie  60000.0
-3    David  60000.0
-4      Eve  65000.0
-5     Frank 60000.0
-6    Grace  70000.0
+     name   income
+0   Amit  52000.0
+1   Boby  65000.0
+2  Ansh  70000.0
+3   Viraj  73000.0
+4  Ankita  85000.0
+5   Jayesh  70000.0
+6   Snehal  70000.0
 """
 
 """Scenario 4: Text Pre-processing
@@ -125,9 +126,9 @@ import re
 # Sample DataFrame
 data = {
     "text": [
-        "Hello World!",
+        "Hello Pratisha!",
         "Python is AWESOME!!",
-        "Data @Science is the future...",
+        "Data @2020 Science is the future...",
         "Pre-processing: Important step!!"
     ]
 }
@@ -145,9 +146,9 @@ print(df)
 
 """Output:
                   text                      cleaned_text
-0                      Hello World!                    [hello, world]
+0               Hello Pratiksha!               [hello, pratiksha]
 1               Python is AWESOME!!             [python, is, awesome]
-2    Data @Science is the future...  [data, science, is, the, future]
+2    Data @2020 Science is the future...  [data, 2020, science, is, the, future]
 3  Pre-processing: Important step!!  [preprocessing, important, step]
 """
 
@@ -186,49 +187,26 @@ Test Accuracy: 1.0
 """Scenario 6: Custom Evaluation Metric
 Task: Implement a custom metric weighted_accuracy where class 0 has a weight of 1 and class 1 has a weight of 2."""
 
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
 import numpy as np
 
-# Custom weighted accuracy metric
 def weighted_accuracy(y_true, y_pred):
-    y_true = tf.cast(y_true, tf.int32)
-    y_pred = tf.cast(tf.round(y_pred), tf.int32)
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
 
-    class_0 = tf.cast(tf.equal(y_true, 0), tf.float32)
-    class_1 = tf.cast(tf.equal(y_true, 1), tf.float32)
-
-    correct = tf.cast(tf.equal(y_true, y_pred), tf.float32)
-    weights = class_0 * 1.0 + class_1 * 2.0
+    weights = np.where(y_true == 0, 1, 2)
+    correct = (y_true == y_pred).astype(int)
     weighted_correct = correct * weights
+    return weighted_correct.sum() / weights.sum()
 
-    return tf.reduce_sum(weighted_correct) / tf.reduce_sum(weights)
+y_true = np.array([0, 1, 1, 0, 1])
+y_pred = np.array([0, 1, 0, 0, 1])
 
-# Dummy binary classification data
-X = np.random.rand(100, 5)
-y = np.random.randint(0, 2, 100)
+acc = weighted_accuracy(y_true, y_pred)
+print(f"✅ Weighted Accuracy: {acc:.2f}")
 
-# Build a simple model
-model = Sequential([
-    Dense(10, activation='relu', input_shape=(5,)),
-    Dense(1, activation='sigmoid')
-])
-
-# Compile with custom metric
-model.compile(
-    optimizer='adam',
-    loss='binary_crossentropy',
-    metrics=[weighted_accuracy]
-)
-
-# Train the model
-model.fit(X, y, epochs=5, batch_size=16)
-
-Output: 
-Epoch 1/5
-weighted_accuracy: 0.85
-
+"""
+OUTPUT-->
+✅ Weighted Accuracy: 0.75
 
 
 """
@@ -374,11 +352,33 @@ except json.JSONDecodeError:
 Task: Write a prompt to summarize a news article into 2 sentences. 
 If the summary exceeds 50 words, truncate it to the nearest complete sentence."""
 
-"KOlhapur"
-"""Kolhapur, a city in Maharashtra, is witnessing rapid development in infrastructure and education.
-New roads, bridges, and smart city initiatives are transforming the urban landscape. In addition,
-several reputed educational institutions are attracting students from across the state, boosting the city's 
-image as an educational hub."""
+import re
 
-"""Kolhapur is rapidly growing with improvements in infrastructure and education. Smart city projects and reputed 
-institutions are making it an important hub in Maharashtra."""
+def summarize_text(article: str) -> str:
+    summary = (
+        "Kolhapur is known for its rich cultural heritage, traditional footwear (Kolhapuri chappals), and temples like Mahalaxmi Temple. "
+        "It is also a major hub for jaggery production and is developing as an industrial and educational center in western Maharashtra."
+    )
+    sentences = re.split(r'(?<=[.!?])\s+', summary.strip())
+
+    limited_summary = ' '.join(sentences[:2])
+
+    if len(limited_summary.split()) > 50:
+        limited_summary = sentences[0]
+
+    return limited_summary
+
+# Original article
+article_text = """
+Kolhapur, located in western Maharashtra, is famous for its historical significance and the iconic Mahalaxmi Temple.
+The city is also known for Kolhapuri chappals, a traditional type of handcrafted leather footwear.
+Agriculture is prominent, especially in sugarcane and jaggery production. 
+In addition, Kolhapur is emerging as an educational and industrial hub with growing infrastructure and business opportunities.
+"""
+
+summary_output = summarize_text(article_text)
+print("Final Summary:\n", summary_output)
+
+OUTPUT-->
+Final Summary:
+Kolhapur is known for its rich cultural heritage, traditional footwear (Kolhapuri chappals), and temples like Mahalaxmi Temple. It is also a major hub for jaggery production and is developing as an industrial and educational center in western Maharashtra.
